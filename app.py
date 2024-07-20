@@ -4,7 +4,6 @@ from langchain_openai import ChatOpenAI
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.prompts import MessagesPlaceholder, ChatPromptTemplate
-from langchain.chains import create_history_aware_retriever
 import streamlit as st
 
 st.title("Lucy AI Girlfriend")
