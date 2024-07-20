@@ -72,11 +72,9 @@ if uploaded_file1 and uploaded_file2 and openai_key:
         conversation_history = [
             {"type": msg.type, "content": msg.content} for msg in msgs.messages
         ]
-        print(conversation_history)
         st.session_state.trigger = trigger_eval.invoke(
             {"history": conversation_history}
         ).content
-        print(st.session_state.trigger)
         with st.sidebar:
             if str(st.session_state.trigger) == "0":
                 st.write("No clear match yet")
