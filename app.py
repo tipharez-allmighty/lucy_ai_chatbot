@@ -44,6 +44,7 @@ with st.sidebar:
     uploaded_file2 = st.file_uploader(
         "Upload trigger prompt file in txt format", type="txt"
     )
+    real_response = st.toggle("Realistic response time")
 
 if uploaded_file1 and uploaded_file2 and openai_key:
     sys_prompt = StringIO(uploaded_file1.getvalue().decode("utf-8")).read()
@@ -110,7 +111,12 @@ if uploaded_file1 and uploaded_file2 and openai_key:
                 st.write("Red Light")
             if str(st.session_state.trigger) == "2":
                 st.write("Green Light")
-
-        response = get_response(with_message_history, user_input)
+        if real_response:
+            response = get_response(with_message_history, user_input)
+        else:
+            response = with_message_history.invoke(
+                {"input": user_input},
+                config={"configurable": {"session_id": "abc123"}},
+            ).content
 
         st.chat_message("human").write(response)
