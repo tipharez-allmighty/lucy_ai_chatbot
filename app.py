@@ -15,10 +15,10 @@ def responseTime(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         elapsed_time = end_time - start_time
-        time_for_response = 20 - elapsed_time
-
-        if time_for_response > 0:
-            time.sleep(random.uniform(1, time_for_response))
+        time_for_response = len(result) * 60 / 200
+        if elapsed_time < time_for_response:
+            time_for_response = time_for_response - elapsed_time
+            time.sleep(random.uniform(time_for_response, time_for_response + 2))
 
         return result
 
