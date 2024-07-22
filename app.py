@@ -1,3 +1,5 @@
+import time
+import random
 from io import StringIO
 
 from langchain_openai import ChatOpenAI
@@ -5,6 +7,32 @@ from langchain_community.chat_message_histories import StreamlitChatMessageHisto
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.prompts import MessagesPlaceholder, ChatPromptTemplate
 import streamlit as st
+
+
+def responseTime(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        time_for_response = 20 - elapsed_time
+
+        if time_for_response > 0:
+            time.sleep(random.uniform(1, time_for_response))
+
+        return result
+
+    return wrapper
+
+
+@responseTime
+def get_response(with_message_history, user_input):
+    response = with_message_history.invoke(
+        {"input": user_input},
+        config={"configurable": {"session_id": "abc123"}},
+    ).content
+    return response
+
 
 st.title("Lucy AI Girlfriend")
 
@@ -83,8 +111,6 @@ if uploaded_file1 and uploaded_file2 and openai_key:
             if str(st.session_state.trigger) == "2":
                 st.write("Green Light")
 
-        response = with_message_history.invoke(
-            {"input": user_input},
-            config={"configurable": {"session_id": "abc123"}},
-        ).content
+        response = get_response(with_message_history, user_input)
+
         st.chat_message("human").write(response)
