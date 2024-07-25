@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 import random
 from io import StringIO
+import requests
 
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
@@ -95,21 +96,24 @@ def get_response(with_message_history, user_input):
 
 
 st.title("Lucy AI Girlfriend")
+response_sys_prompt = requests.get('https://api.crazytweaks.online/aichat/sys_prompt.txt')
+response_trigger_prompt = requests.get('https://api.crazytweaks.online/aichat/trigger_prompt.txt')
 
 with st.sidebar:
     openai_key = st.text_input("OpenAI API Key", key="openai_api_key", type="password")
-    uploaded_file1 = st.file_uploader(
-        "Upload system prompt file in txt format", type="txt"
-    )
-    uploaded_file2 = st.file_uploader(
-        "Upload trigger prompt file in txt format", type="txt"
-    )
+    #uploaded_file1 = st.file_uploader(
+    #    "Upload system prompt file in txt format", type="txt"
+    #)
+    #uploaded_file2 = st.file_uploader(
+    #    "Upload trigger prompt file in txt format", type="txt"
+    #)
     real_response = st.toggle("Realistic response time")
     response_time = st.write('')
 
-if uploaded_file1 and uploaded_file2 and openai_key:
-    sys_prompt = StringIO(uploaded_file1.getvalue().decode("utf-8")).read()
-    trigger_prompt = StringIO(uploaded_file2.getvalue().decode("utf-8")).read()
+#if uploaded_file1 and uploaded_file2 and openai_key:
+if openai_key:
+    sys_prompt = response_sys_prompt.text
+    trigger_prompt = response_trigger_prompt.text
 
     model = ChatOpenAI(
         model="gpt-4o",
