@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import random
 from io import StringIO
 
@@ -8,6 +9,62 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.prompts import MessagesPlaceholder, ChatPromptTemplate
 import streamlit as st
 
+def display_message(role, message_text):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if role == 'human':
+        message_class = 'chat-human'
+        icon = '👩'  
+        align = 'flex-start'  
+    else:
+        message_class = 'chat-bot'
+        icon = '👩'  
+        align = 'flex-end'  
+
+    full_message = f"""
+    <div class="chat-container {message_class}" style="justify-content: {align};">
+        <div class="message">
+            <span class="icon">{icon}</span>
+            <p>{message_text}</p>
+            <p class="timestamp">Sent at {timestamp}</p>
+        </div>
+    </div>
+    <style>
+    .chat-container {{
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        width: 100%;
+    }}
+    .chat-human .message {{
+        background-color: #00004B;  /* Dark color for human messages */
+        border-radius: 10px;
+        padding: 10px;
+        margin-left: 10px;
+        color: white;  /* Text color for better contrast */
+        max-width: 70%;
+    }}
+    .chat-bot .message {{
+        background-color: #00008B;  /* Blue color for AI messages */
+        border-radius: 10px;
+        padding: 10px;
+        margin-right: 10px;
+        color: white;  /* Text color for better contrast */
+        max-width: 70%;
+    }}
+    .icon {{
+        font-size: 24px;
+        line-height: 1;
+        display: block;
+        margin-bottom: 5px;
+    }}
+    .timestamp {{
+        font-size: 12px;
+        color: gray;
+        margin-top: 5px;
+    }}
+    </style>
+    """
+    st.markdown(full_message, unsafe_allow_html=True)
 
 def responseTime(func):
     def wrapper(*args, **kwargs):
@@ -15,12 +72,15 @@ def responseTime(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         elapsed_time = end_time - start_time
-        time_for_response = len(result) * 60 / 200
-        if elapsed_time < time_for_response:
-            time_for_response = time_for_response - elapsed_time
-            time.sleep(random.uniform(time_for_response, time_for_response + 2))
+        time_for_response = len(result) * 3 / 20
 
-        return result
+        sleep_time = 0
+
+        if elapsed_time < time_for_response:
+            sleep_time = time_for_response - elapsed_time + random.uniform(0,3)
+            time.sleep(sleep_time)
+
+        return result, sleep_time
 
     return wrapper
 
@@ -45,6 +105,7 @@ with st.sidebar:
         "Upload trigger prompt file in txt format", type="txt"
     )
     real_response = st.toggle("Realistic response time")
+    response_time = st.write('')
 
 if uploaded_file1 and uploaded_file2 and openai_key:
     sys_prompt = StringIO(uploaded_file1.getvalue().decode("utf-8")).read()
@@ -98,6 +159,7 @@ if uploaded_file1 and uploaded_file2 and openai_key:
             st.stop()
 
         st.chat_message("human").write(user_input)
+        #display_message('human',user_input)
         conversation_history = [
             {"type": msg.type, "content": msg.content} for msg in msgs.messages
         ]
@@ -111,12 +173,19 @@ if uploaded_file1 and uploaded_file2 and openai_key:
                 st.write("Red Light")
             if str(st.session_state.trigger) == "2":
                 st.write("Green Light")
+
         if real_response:
-            response = get_response(with_message_history, user_input)
+            response, sleep_time = get_response(with_message_history, user_input)
+        #timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        #full_message = f"{response}\n*Sent at {timestamp}*"
+            st.chat_message("ai").write(response)
+            #display_message('ai', response)
+            with st.sidebar:
+                st.write(f"Response generated in: {sleep_time:.2f} seconds")           
         else:
             response = with_message_history.invoke(
                 {"input": user_input},
                 config={"configurable": {"session_id": "abc123"}},
             ).content
-
-        st.chat_message("human").write(response)
+            st.chat_message("ai").write(response)
+            #display_message('ai', response)
