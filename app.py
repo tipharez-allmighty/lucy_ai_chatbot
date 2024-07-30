@@ -115,9 +115,9 @@ with st.sidebar:
 #if uploaded_file1 and uploaded_file2 and openai_key:
 if openai_key:
     with st.sidebar:
-        if st.button('Copy to clipboard'):
+        if st.button('Copy  API key to clipboard'):
             pyperclip.copy(openai_key)
-            st.write('Copied to clipboard!')
+            st.write('API key Copied to clipboard!')
     sys_prompt = response_sys_prompt.text
     trigger_prompt = response_trigger_prompt.text
 
