@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 from io import StringIO
 import requests
+import pyperclip
 
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
@@ -101,6 +102,7 @@ response_trigger_prompt = requests.get('https://api.crazytweaks.online/aichat/tr
 
 with st.sidebar:
     openai_key = st.text_input("OpenAI API Key", key="openai_api_key", type="password")
+  
     #uploaded_file1 = st.file_uploader(
     #    "Upload system prompt file in txt format", type="txt"
     #)
@@ -112,6 +114,10 @@ with st.sidebar:
 
 #if uploaded_file1 and uploaded_file2 and openai_key:
 if openai_key:
+    with st.sidebar:
+        if st.button('Copy to clipboard'):
+            pyperclip.copy(openai_key)
+            st.write('Copied to clipboard!')
     sys_prompt = response_sys_prompt.text
     trigger_prompt = response_trigger_prompt.text
 
